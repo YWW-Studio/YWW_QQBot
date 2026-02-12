@@ -245,11 +245,12 @@ class EssenceHandler(CommandHandlerBase):
             )
             
             # 处理参数并更新查询
-            limit_count = self._process_query_params(query, args)
+            query, limit_count = self._process_query_params(query, args)
             
             # 按时间倒序排列，最新的在前
             query = query.order_by(EssenceMessage.operator_time.desc())
-            query = query.limit(limit_count)
+            if limit_count is not None:
+                query = query.limit(limit_count)
             
             # 执行查询
             messages = list(query)
@@ -273,7 +274,7 @@ class EssenceHandler(CommandHandlerBase):
         limit_count = 10
         
         if not args:
-            return limit_count
+            return query, limit_count
         
         # 处理第一个参数
         param = args[0]
@@ -281,15 +282,15 @@ class EssenceHandler(CommandHandlerBase):
         # 检查参数类型：日期、QQ号、还是数字
         if param.count(".") == 2:
             # 完整日期格式 (2025.02.07)
-            self._process_date_param(query, param)
+            query = self._process_date_param(query, param)
             limit_count = 100
         elif param.count(".") == 1:
             # 年月格式 (2025.02)
-            self._process_year_month_param(query, param)
+            query = self._process_year_month_param(query, param)
             limit_count = 100
         elif param.isdigit() and len(param) == 4:
             # 仅年份格式 (2025)
-            self._process_year_param(query, param)
+            query = self._process_year_param(query, param)
             limit_count = 100
         elif param.isdigit() and 1 <= int(param) <= 100:
             # 单个数字参数，按条数查询
@@ -303,7 +304,7 @@ class EssenceHandler(CommandHandlerBase):
         if len(args) >= 2:
             limit_count = self._process_limit_param(args[1], limit_count)
         
-        return limit_count
+        return query, limit_count
     
     def _process_date_param(self, query, date_param: str):
         """处理日期参数。"""
@@ -313,6 +314,7 @@ class EssenceHandler(CommandHandlerBase):
         query = query.where(
             fn.DATE(fn.datetime(EssenceMessage.operator_time, 'unixepoch')) == target_date
         )
+        return query
     
     def _process_year_month_param(self, query, year_month_param: str):
         """处理年月参数。"""
@@ -329,6 +331,7 @@ class EssenceHandler(CommandHandlerBase):
             (EssenceMessage.operator_time >= start_timestamp) &
             (EssenceMessage.operator_time <= end_timestamp)
         )
+        return query
     
     def _process_year_param(self, query, year_param: str):
         """处理年份参数。"""
@@ -341,6 +344,7 @@ class EssenceHandler(CommandHandlerBase):
             (EssenceMessage.operator_time >= start_timestamp) &
             (EssenceMessage.operator_time <= end_timestamp)
         )
+        return query
     
     def _process_limit_param(self, limit_param: str, default_limit: int):
         """处理限制条数参数。"""
