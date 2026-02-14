@@ -22,7 +22,7 @@ YWW-QQBot 是一个基于 NapCat 的 QQ 机器人项目，用于处理群组消�
 ### 安装依赖
 
 ```bash
-pip install napcat peewee
+pip install napcat-sdk peewee
 ```
 
 ### 配置与运行
