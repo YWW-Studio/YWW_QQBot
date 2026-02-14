@@ -223,8 +223,8 @@ class EssenceHandler(CommandHandlerBase):
     
 
     @CommandHandlerBase.command("查看精华", 
-                               usage="查看精华 [日期/QQ号/数量]",
-                               description="查看精华消息，支持按日期、QQ号或数量筛选，默认显示前10条")
+                               usage="查看精华 [日期/QQ号/数量] [数量]",
+                               description="查看精华消息，支持按日期、QQ号或数量筛选，默认显示前100条")
     async def handle_essence_list(self, event : GroupMessageEvent, args: list):
         """处理查看精华消息命令。"""
         group_id = event.group_id
